@@ -1,4 +1,6 @@
 class SongsController < ApplicationController
+  before_action :check_create_songs_permission, only: [:new]
+
   def index
     if params[:artist_id]
       @artist = Artist.find_by(id: params[:artist_id])
@@ -63,8 +65,14 @@ class SongsController < ApplicationController
 
   private
 
+  def check_create_songs_permission
+    preference = Preference.first
+    unless preference&.allow_create_songs
+      redirect_to songs_path, alert: 'Creating new songs is not allowed.'
+    end
+  end
+
   def song_params
     params.require(:song).permit(:title, :artist_name)
   end
 end
-
